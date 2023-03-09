@@ -1,4 +1,2 @@
 #!/bin/bash
-
-cd ~
-echo "Current working directory is now: $PWD"
+cd
