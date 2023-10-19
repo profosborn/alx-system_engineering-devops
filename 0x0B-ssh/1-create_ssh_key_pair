@@ -1,4 +1,23 @@
 #!/usr/bin/env bash
-# Creates RSA key pair
 
-ssh-keygen -b 4096 -f school -t rsa -N betty
+# Specify the key file name
+key_name="school"
+
+# Specify the passphrase
+passphrase="betty"
+
+# Check if the key file already exists
+if [ -f "$key_name" ]; then
+  echo "The key file '$key_name' already exists. Please remove it or choose a different name."
+  exit 1
+fi
+
+# Generate the RSA key pair with a 4096-bit key size and a passphrase
+ssh-keygen -t rsa -b 4096 -f "$key_name" -N "$passphrase"
+
+# Check the exit status of ssh-keygen
+if [ $? -eq 0 ]; then
+  echo "RSA key pair generated successfully."
+else
+  echo "Error generating the RSA key pair."
+fi
