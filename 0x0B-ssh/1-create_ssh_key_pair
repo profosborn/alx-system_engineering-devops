@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 
-# Specify the key file name
+# Name of the private key
 key_name="school"
 
-# Specify the passphrase
+# Number of bits in the key
+key_bits=4096
+
+# Passphrase for the private key
 passphrase="betty"
 
 # Check if the key file already exists
@@ -12,8 +15,8 @@ if [ -f "$key_name" ]; then
   exit 1
 fi
 
-# Generate the RSA key pair with a 4096-bit key size and a passphrase
-ssh-keygen -t rsa -b 4096 -f "$key_name" -N "$passphrase"
+# Generate the RSA key pair with the specified key size and passphrase
+ssh-keygen -t rsa -b "$key_bits" -f "$key_name" -N "$passphrase"
 
 # Check the exit status of ssh-keygen
 if [ $? -eq 0 ]; then
