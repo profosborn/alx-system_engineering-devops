@@ -1,61 +1,59 @@
-# Postmortem
+# Website Downtime Postmortem
 
-Upon the release of ALX's System Engineering & DevOps project 0x19, approximately 06:00 (GMT) here in Ghana, an outage occurred on an isolated Ubuntu 14.04 container running an Apache web server. GET requests on the server led to 500 Internal Server Error's, when the expected response was an HTML file defining a simple Holberton WordPress site.
+## Incident Overview
 
-## Debugging Process
+**Start Date & Time:** October 20, 2023, 10:30 AM (GMT)
+**End Date & Time:** October 20, 2023, 11:15 AM (GMT)
 
-Bug debugger Bamidele (Lexxyla... as in my actual initials... made that up on the spot, pretty
-good, huh?) encountered the issue upon opening the project and being, well, instructed to
-address it, roughly 19:20 PST. He promptly proceeded to undergo solving the problem.
+### Impact
 
-1. Checked running processes using `ps aux`. Two `apache2` processes - `root` and `www-data` -
-were properly running.
+- **Affected Service:** Website
+- **User Experience:** Users experienced slow load times and partial unavailability.
+- **User Impact:** Approximately 30% of users faced delays and timeouts during the incident.
 
-2. Looked in the `sites-available` folder of the `/etc/apache2/` directory. Determined that
-the web server was serving content located in `/var/www/html/`.
+### Root Cause
 
-3. In one terminal, ran `strace` on the PID of the `root` Apache process. In another, curled
-the server. Expected great things... only to be disappointed. `strace` gave no useful
-information.
+The incident was triggered by an unexpected surge in traffic, resulting from a popular news article linking to our website. The increased load overwhelmed our infrastructure, leading to server overload and subsequent downtime.
 
-4. Repeated step 3, except on the PID of the `www-data` process. Kept expectations lower this
-time... but was rewarded! `strace` revelead an `-1 ENOENT (No such file or directory)` error
-occurring upon an attempt to access the file `/var/www/html/wp-includes/class-wp-locale.phpp`.
+## Incident Timeline
 
-5. Looked through files in the `/var/www/html/` directory one-by-one, using Vim pattern
-matching to try and locate the erroneous `.phpp` file extension. Located it in the
-`wp-settings.php` file. (Line 137, `require_once( ABSPATH . WPINC . '/class-wp-locale.php' );`).
+- **10:30 AM (GMT):**
+   - **Detection:** Monitoring system triggers alerts for high server load and increased latency.
+- **10:35 AM (GMT):**
+   - **Investigation:** Engineering team initiated an investigation, suspecting a potential DDoS attack.
+- **10:45 AM (GMT):**
+   - **Analysis:** In-depth server logs revealed the surge was due to the news article, causing server overload.
+- **10:50 AM (GMT):**
+   - **Escalation:** DevOps team was engaged to optimize server resources and mitigate the load.
+- **11:15 AM (GMT):**
+   - **Resolution:** Server configurations were optimized, additional resources added, and normal service was restored.
 
-6. Removed the trailing `p` from the line.
+## Root Cause and Resolution
 
-7. Tested another `curl` on the server. 200 A-ok!
+### Root Cause
 
-8. Wrote a Puppet manifest to automate fixing of the error.
+- The root cause was an unexpected traffic surge due to the news article, overloading our servers, which were unprepared for such spikes.
 
-## Summation
+### Resolution
 
-In short, a typo. Gotta love'em. In full, the WordPress app was encountering a critical
-error in `wp-settings.php` when tyring to load the file `class-wp-locale.phpp`. The correct
-file name, located in the `wp-content` directory of the application folder, was
-`class-wp-locale.php`.
+- We optimized server configurations to handle high loads effectively.
+- We implemented improved resource scaling to accommodate traffic surges.
 
-Patch involved a simple fix on the typo, removing the trailing `p`.
+## Corrective and Preventative Measures
 
-## Prevention
+### Improvements & Fixes
 
-This outage was not a web server error, but an application error. To prevent such outages
-moving forward, please keep the following in mind.
+- Enhance the server scaling strategy to accommodate traffic spikes.
+- Implement a Content Delivery Network (CDN) to distribute traffic load and reduce stress on primary servers.
+- Set up real-time traffic monitoring and server load detection to proactively identify and address anomalies.
 
-* Test! Test test test. Test the application before deploying. This error would have arisen
-and could have been addressed earlier had the app been tested.
+### Task List
 
-* Status monitoring. Enable some uptime-monitoring service such as
-[UptimeRobot](./https://uptimerobot.com/) to alert instantly upon outage of the website.
+- Implement automatic server resource scaling to manage traffic surges.
+- Procure and integrate a CDN service.
+- Enhance monitoring tools for real-time traffic anomaly detection.
+- Conduct load testing to ensure the infrastructure can handle peak loads.
 
-Note that in response to this error, I wrote a Puppet manifest
-[0-strace_is_your_friend.pp](https://github.com/profosborn/alx-system_engineering-devops/blob/main/0x17-web_stack_debugging_3/0-strace_is_your_friend.pp)
-to automate fixing of any such identitical errors should they occur in the future. The manifest
-replaces any `phpp` extensions in the file `/var/www/html/wp-settings.php` with `php`.
+---
 
-But of course, it will never occur again, because we're programmers, and we never make
-errors! :wink:
+This README file provides a comprehensive postmortem for the website downtime incident that occurred from October 20, 2023, to October 20, 2023. It includes incident details, a timeline of events, the root cause, resolution, and actionable measures for improvement. This information is essential for the team's understanding and for taking steps to prevent similar incidents in the future.
